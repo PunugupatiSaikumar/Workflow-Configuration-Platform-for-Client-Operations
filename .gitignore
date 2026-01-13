@@ -30,7 +30,9 @@ dist/
 Thumbs.db
 
 # Prisma
-prisma/migrations/
+# Keep migrations (they're needed for deployment)
+# Ignore generated client in node_modules
+node_modules/.prisma/
 
 # Docker
 *.pid

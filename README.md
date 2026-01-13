@@ -5,7 +5,7 @@ A comprehensive workflow management platform built with React, Node.js, and Post
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - PostgreSQL 15+
 - npm or yarn
 
@@ -13,8 +13,8 @@ A comprehensive workflow management platform built with React, Node.js, and Post
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/workflow-platform.git
-   cd workflow-platform
+   git clone https://github.com/PunugupatiSaikumar/Workflow-Configuration-Platform-for-Client-Operations.git
+   cd Workflow-Configuration-Platform-for-Client-Operations
    ```
 
 2. **Backend Setup**
@@ -34,7 +34,7 @@ A comprehensive workflow management platform built with React, Node.js, and Post
    cd frontend
    npm install
    cp .env.example .env
-   # Edit .env with your API URL
+   # Edit .env with your API URL: REACT_APP_API_URL=http://localhost:5001/api
    npm start
    ```
 
@@ -45,14 +45,14 @@ A comprehensive workflow management platform built with React, Node.js, and Post
 
 ## 📦 Deployment
 
-### Option 1: Railway + Vercel (Recommended)
+### Railway + Vercel (Recommended)
 
 **Backend (Railway):**
 1. Sign up at https://railway.app
 2. Deploy from GitHub repo
 3. Set root directory: `backend`
 4. Add PostgreSQL database
-5. Set environment variables
+5. Set environment variables (see `DEPLOY_STEPS.md`)
 
 **Frontend (Vercel):**
 1. Sign up at https://vercel.com
@@ -62,7 +62,7 @@ A comprehensive workflow management platform built with React, Node.js, and Post
 
 See `DEPLOY_STEPS.md` for detailed instructions.
 
-### Option 2: Docker
+### Docker
 
 ```bash
 docker-compose up -d
@@ -81,6 +81,7 @@ docker-compose up -d
 - [Database Schema](docs/DATABASE_SCHEMA.md)
 - [Deployment Guide](DEPLOYMENT_GUIDE.md)
 - [Quick Deploy](DEPLOY_STEPS.md)
+- [Production Checklist](PRODUCTION_CHECKLIST.md)
 
 ## 🛠️ Tech Stack
 
@@ -92,7 +93,3 @@ docker-compose up -d
 ## 📝 License
 
 MIT License
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
