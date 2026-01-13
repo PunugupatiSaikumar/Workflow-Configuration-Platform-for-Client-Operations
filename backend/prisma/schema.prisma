@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum WorkflowStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Client {
+  id          String   @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  company     String?
+  notes       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflows   Workflow[]
+  executions  WorkflowExecution[]
+
+  @@map("clients")
+}
+
+model Workflow {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  clientId    String
+  status      WorkflowStatus @default(DRAFT)
+  version     Int            @default(1)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   String?
+
+  client      Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  steps       WorkflowStep[]
+  transitions WorkflowTransition[]
+  executions  WorkflowExecution[]
+  reports     WorkflowReport[]
+
+  @@index([clientId])
+  @@index([status])
+  @@map("workflows")
+}
+
+model WorkflowStep {
+  id          String   @id @default(uuid())
+  workflowId  String
+  name        String
+  description String?
+  stepType    String   // e.g., "approval", "notification", "data_entry", "custom"
+  order       Int      // Order in the workflow
+  config      Json?    // JSONB for step configuration
+  isRequired  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow    Workflow            @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  transitionsFrom WorkflowTransition[] @relation("FromStep")
+  transitionsTo   WorkflowTransition[] @relation("ToStep")
+  executionLogs ExecutionLog[]
+
+  @@index([workflowId])
+  @@index([workflowId, order])
+  @@map("workflow_steps")
+}
+
+model WorkflowTransition {
+  id          String   @id @default(uuid())
+  workflowId  String
+  fromStepId  String
+  toStepId    String
+  condition   Json?    // JSONB for conditional rules
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow    Workflow     @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  fromStep    WorkflowStep @relation("FromStep", fields: [fromStepId], references: [id], onDelete: Cascade)
+  toStep      WorkflowStep @relation("ToStep", fields: [toStepId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([fromStepId])
+  @@index([toStepId])
+  @@map("workflow_transitions")
+}
+
+model WorkflowExecution {
+  id          String          @id @default(uuid())
+  workflowId  String
+  clientId    String
+  status      ExecutionStatus @default(PENDING)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+  metadata    Json?           // JSONB for execution metadata
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  workflow    Workflow       @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  client      Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  logs        ExecutionLog[]
+  reports     WorkflowReport[]
+
+  @@index([workflowId])
+  @@index([clientId])
+  @@index([status])
+  @@index([startedAt])
+  @@map("workflow_executions")
+}
+
+model ExecutionLog {
+  id          String       @id @default(uuid())
+  executionId String
+  stepId      String?
+  status      StepStatus   @default(PENDING)
+  message     String?
+  data        Json?        // JSONB for log data
+  error       String?
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+
+  execution   WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  step        WorkflowStep?     @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  @@index([executionId])
+  @@index([stepId])
+  @@index([status])
+  @@map("execution_logs")
+}
+
+model WorkflowReport {
+  id          String   @id @default(uuid())
+  workflowId  String
+  executionId String?
+  reportType  String   // e.g., "daily", "weekly", "monthly", "execution"
+  metrics     Json     // JSONB for report metrics
+  periodStart DateTime
+  periodEnd   DateTime?
+  createdAt   DateTime @default(now())
+
+  workflow    Workflow          @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  execution   WorkflowExecution? @relation(fields: [executionId], references: [id], onDelete: SetNull)
+
+  @@index([workflowId])
+  @@index([executionId])
+  @@index([reportType])
+  @@index([periodStart])
+  @@map("workflow_reports")
+}
