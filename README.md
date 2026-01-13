@@ -13,7 +13,7 @@ A comprehensive workflow management platform built with React, Node.js, and Post
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/PunugupatiSaikumar/Workflow-Configuration-Platform-for-Client-Operations.git
+   git clone Reponame.git
    cd Workflow-Configuration-Platform-for-Client-Operations
    ```
 
